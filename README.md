@@ -1,9 +1,12 @@
-goGradeLevel
-============
+# goGradeLevel a tool to calculate the reading level of various pieces of text
 
-find flesch / Kincade grade level of arbitrary text
 
-see http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_test
+##Info
+
+for Flesch/Kincaid, see http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_test
+for Coleman/Liau, see http://en.wikipedia.org/wiki/Coleman-Liau_Index
+
+##Use
 
 package main
 
