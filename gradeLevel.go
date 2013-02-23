@@ -1,7 +1,6 @@
 package goGradeLevel
 
 import (
-	"fmt"
 	"strings"
 	"unicode"
 )
@@ -42,8 +41,6 @@ func phraseStats(s string) (numWords, numSyllables, numSentences float64) {
 	}
 
 	numSentences = float64(CountSentences(s))
-
-	fmt.Printf("numWords = %f, numSyllables = %f, numSentences = %f\n", numWords, numSyllables, numSentences)
 
 	return
 }
