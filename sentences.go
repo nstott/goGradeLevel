@@ -1,45 +1,32 @@
 package goGradeLevel
 
 import (
-	"fmt"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 )
 
 func CountSentences(s string) int {
-	f := strings.FieldsFunc(s, isTerminatingPunc)
-
-	// only include sentences that are larger then 2 characters
-	total := 0
-	for _, v := range f {
-		if len(v) > 2 {
-			total += 1
-		}
-	}
-	return total
-}
-
-func CountSentences2(s string) int {
-
-	fmt.Printf("Counting %s\n", s)
 	total := 0
 	runes := []rune(s)
 	l := utf8.RuneCountInString(s)
+	startWord := 0
 	for k, v := range runes {
-		if k == l-1 {
+		if k == l-1 { // if we're at the end of the loop, then add 1, 
 			total += 1
 			continue
+		} 
+		if isPunct(v) && unicode.IsSpace(runes[k+1]) && isNextCharCapitalized(runes[k+1:]) && (k - startWord) > 2 {
+			// if we're a correct punctuation rune
+			// and the next character is a space
+			// and the first char after the space(s) is a capital
+			// and the start of the word is at least 2 runes away
+			total += 1
 		}
-		if isPunct(v) {
-			// punc
-			// if we're at the end, then add one
-			// if we're not at the end, but have a space or another punc then add one
-			if isPunct(runes[k]) && unicode.IsSpace(runes[k+1]) && isNextCharCapitalized(runes[k+1:]) {
-				total += 1
-			}
+		if !unicode.IsLetter(v) {  
+			// if we're at the beginning of a word, then update the index.
+			startWord = k
+		}
 
-		}
 	}
 	return total
 }
@@ -49,10 +36,6 @@ func isPunct(r rune) bool {
 	// http://www.fileformat.info/info/unicode/category/Po/list.htm
 	// which chars, apart from a comma don't mean end of sentence.  quotes perhaps, semi colon
 	return r != ',' && unicode.IsPunct(r)
-}
-
-func isTerminatingPunc(c rune) bool {
-	return c == '.' || c == '!' || c == '?'
 }
 
 func isNextCharCapitalized(runes []rune) bool {
