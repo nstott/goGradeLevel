@@ -1,4 +1,5 @@
-# goGradeLevel a tool to calculate the reading level of text
+# goGradeLevel 
+a tool to calculate the reading level of text
 
 
 ##Info
@@ -8,6 +9,9 @@ http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_test
 
 for more information about Coleman/Liau, see: 
 http://en.wikipedia.org/wiki/Coleman-Liau_Index
+
+##Install
+	go get github.com/nstott/goGradeLevel
 
 ##Use
 
