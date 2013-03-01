@@ -2,7 +2,6 @@ package goGradeLevel
 
 import (
 	"net/http"
-	"log"
 	"strings"
 	"code.google.com/p/go-html-transform/h5"
 )
@@ -20,6 +19,11 @@ func NewRemoteError(msg string) *RemoteError {
 	return &RemoteError{msg}
 }
 
+type RemoteResult struct {
+	url string
+	result *Result
+}
+
 var validElementTypes = []string{
 	"title", "div", "span", "h1", "h2", "h3",
 	"h4", "h5", "h6", "li", "a", "p", "em", "i", 
@@ -31,17 +35,29 @@ var endSentenceElementTypes = []string {
 
 var eos = ". "
 
-func AnalyzeUrl(url string) (string, error) {
+func AnalyzeUrl(url string) *Result {
 	text, err := getRemoteText(url)
 	if (err != nil) {
-		return "", err
+		return &Result{}
 	}
 	res := Analyze(text)
-	log.Printf("%v", res)
-	// log.Printf("Analyzing %s, Flesch Ease: %5.2f, Flesch/Kincaid Grade Level: %5.2f, Coleman/Liau Index %5.2f", 
-		// url, res.readingEase(text), res.fleschKincaidGradeLevel(text), res.colemanLiauIndex(text))
+	return res
+}
 
-	return "", nil
+func AnalyzeUrls(in []string) map[string]*Result {
+	ch := make(chan *RemoteResult, len(in))
+	for _, v := range in {
+		go func (url string) {
+			s := AnalyzeUrl(url)
+			ch <- &RemoteResult{url: url, result: s}
+			}(v)
+	}
+	ret := make(map[string]*Result)
+	for i := 0; i < len(in); i ++  {
+		r := <- ch		
+		ret[r.url] = r.result
+	}
+	return ret
 }
 
 func getRemoteText(url string) (string, error) {
@@ -57,9 +73,7 @@ func getRemoteText(url string) (string, error) {
 		return "", NewRemoteError("Parse Error")
 	}
 
-	tree := p.Tree()
-	found := collectText(tree)
-
+	found := collectText(p.Tree())
 	return strings.Replace(strings.Join(found, ""), "\n", " ", -1), nil
 }
 

@@ -6,29 +6,27 @@ import (
 )
 
 type Result struct {
-	readingEase float64
-	fleschKincaidGradeLevel float64
-	colemanLiauIndex float64
+	ReadingEase float64
+	FleschKincaidGradeLevel float64
+	ColemanLiauIndex float64
 }
 
 
 func Analyze(s string) *Result {
 
-	numWords, numSyllables, numSentences := phraseStats(s)
-	numLetters := countLetters(s)
+	numWords, numSyllables, numSentences, numLetters := phraseStats(s)
 
 	return &Result{
-		readingEase: calcFleschReadingEase(numWords, numSyllables, numSentences),
-		fleschKincaidGradeLevel: calcFleschKincaidGradeLevel(numWords, numSyllables, numSentences),
-		colemanLiauIndex: calcColemanLiauIndex(numWords, numLetters, numSentences),
+		ReadingEase: calcFleschReadingEase(numWords, numSyllables, numSentences),
+		FleschKincaidGradeLevel: calcFleschKincaidGradeLevel(numWords, numSyllables, numSentences),
+		ColemanLiauIndex: calcColemanLiauIndex(numWords, numLetters, numSentences),
 	}
 }
 
 
 func FleschReadingEase(s string) float64 {
-	numWords, numSyllables, numSentences := phraseStats(s)
+	numWords, numSyllables, numSentences, _ := phraseStats(s)
 	return calcFleschReadingEase(numWords, numSyllables, numSentences)
-
 }
 
 func calcFleschReadingEase(numWords, numSyllables, numSentences float64) float64 {
@@ -37,7 +35,7 @@ func calcFleschReadingEase(numWords, numSyllables, numSentences float64) float64
 
 
 func FleschKincaidGradeLevel(s string) float64 {
-	numWords, numSyllables, numSentences := phraseStats(s)
+	numWords, numSyllables, numSentences, _ := phraseStats(s)
 	return calcFleschKincaidGradeLevel(numWords, numSyllables, numSentences)
 }
 
@@ -46,8 +44,7 @@ func calcFleschKincaidGradeLevel(numWords, numSyllables, numSentences float64) f
 }
 
 func ColemanLiauIndex(s string) float64 {
-	numWords, _, numSentences := phraseStats(s)
-	numLetters := countLetters(s)
+	numWords, _, numSentences, numLetters := phraseStats(s)
 	return calcColemanLiauIndex(numWords, numLetters, numSentences)}
 
 func calcColemanLiauIndex(numWords, numLetters, numSentences float64) float64 { 
@@ -58,20 +55,10 @@ func calcColemanLiauIndex(numWords, numLetters, numSentences float64) float64 {
 }
 
 /*
- * utility functions to count things in the text, 
+ * utility function to count things in the text, 
  * like num Sentences, letters, syllables, etc
  */
-func countLetters(s string) float64 {
-	numLetters := 0.0
-	for _, v := range []rune(s) {
-		if unicode.IsLetter(v) {
-			numLetters += 1.0
-		}
-	}
-	return numLetters	
-}
-
-func phraseStats(s string) (numWords, numSyllables, numSentences float64) {
+func phraseStats(s string) (numWords, numSyllables, numSentences, numLetters float64) {
 	words := strings.Fields(s)
 	numWords = float64(len(words))
 	numSyllables = 0.0
@@ -80,6 +67,13 @@ func phraseStats(s string) (numWords, numSyllables, numSentences float64) {
 	}
 
 	numSentences = float64(CountSentences(s))
+
+	numLetters = 0.0
+	for _, v := range []rune(s) {
+		if unicode.IsLetter(v) {
+			numLetters += 1.0
+		}
+	}
 
 	return
 }

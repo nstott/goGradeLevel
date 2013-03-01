@@ -12,18 +12,47 @@ func Test_getRemoteText(t *testing.T) {
 	// fmt.Println(getRemoteText("http://www.wired.com/wiredscience/2013/02/how-mathematical-research-is-making-the-life-of-pi-tiger-even-better/"))
 }
 
-func Test_analyzeUrl(t *testing.T) {
+func Test_AnalyzeUrl(t *testing.T) {
 	var d = []struct{
 		in string
-		want string
+		want *Result
 	} {
-		{"http://apod.nasa.gov/apod/ap130220.html", ""},
+		{"http://apod.nasa.gov/apod/ap130220.html", &Result{ReadingEase:41.01510209042297,FleschKincaidGradeLevel:11.074987846378221,ColemanLiauIndex:13.415867768595039}},
 	}	
 
 	for _, v := range d {
-		_, err := AnalyzeUrl(v.in)
-		if err != nil {
-			t.Error("%s threw a %s", v.in, err.Error())
+		b := AnalyzeUrl(v.in)
+		if !compareResult(b, v.want) {
+			t.Errorf("url: %s wanted %v got %v", v.in, v.want, b)
+		}
+	}
+}
+
+func Test_AnalyzeUrls(t *testing.T) {
+	var d = []struct{
+		in []string
+		want map[string]*Result
+	} {
+		{
+			[]string{
+				"http://apod.nasa.gov/apod/ap130220.html",
+				"http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_test",
+				}, 
+			map[string]*Result{
+				"http://apod.nasa.gov/apod/ap130220.html": 
+					&Result{ReadingEase:41.01510209042297,FleschKincaidGradeLevel:11.074987846378221,ColemanLiauIndex:13.415867768595039},
+				"http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_test": 
+					&Result{ReadingEase:39.94790088638197,FleschKincaidGradeLevel:10.4305418057634,ColemanLiauIndex:13.429741248097411},
+			},
+		},
+	}	
+
+	for _, v := range d {
+		b := AnalyzeUrls(v.in)
+		for kk, vv := range v.want {
+			if !compareResult(b[kk], vv) {
+				t.Errorf("url: %s, wanted %v,\n got %v", kk, vv, b[kk])				
+			}
 		}
 	}
 }
@@ -67,7 +96,9 @@ func Test_collectText(t *testing.T) {
 	}
 }
 
-
+/*
+ * utility functions
+ */
 func parseString(s string) *h5.Node {
 	p := h5.NewParserFromString(s)
 
@@ -88,4 +119,16 @@ func compareStringArray(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func compareResult(a, b *Result) bool {
+	if a == nil || b == nil {
+		return false
+	}
+	if compareFloats(a.ReadingEase, b.ReadingEase) && 
+		compareFloats(a.FleschKincaidGradeLevel, b.FleschKincaidGradeLevel) && 
+		compareFloats(a.ColemanLiauIndex, b.ColemanLiauIndex) {
+			return true
+		}
+	return false
 }
